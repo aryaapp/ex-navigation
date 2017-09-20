@@ -83,7 +83,7 @@ export default class ExNavigationStackItem extends PureComponent {
 
 const styles = StyleSheet.create({
   main: {
-    backgroundColor: 'white',
+    backgroundColor: 'transparent',
     bottom: 0,
     left: 0,
     position: 'absolute',

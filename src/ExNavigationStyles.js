@@ -1,4 +1,4 @@
-import { Animated, Easing, I18nManager } from 'react-native';
+import { Animated, Easing, I18nManager, Platform } from 'react-native';
 import NavigationExperimental from './navigation-experimental';
 
 const {
@@ -14,29 +14,20 @@ export function setUseNativeDriverExperimental(use: boolean) {
   useNativeDriver = use;
 }
 
-const configureTimingTransition = (
-  transitionProps,
-  previousTransitionProps
-) => ({
+const configureTimingTransition = (transitionProps, previousTransitionProps) => ({
   timing: Animated.timing,
   easing: Easing.inOut(Easing.linear),
   duration: 150,
   useNativeDriver,
 });
 
-const configureSpringTransition = (
-  transitionProps,
-  previousTransitionProps
-) => {
+const configureSpringTransition = (transitionProps, previousTransitionProps) => {
   let speed = 15;
   let restSpeedThreshold = 0.001;
   let restDisplacementThreshold = 0.001;
 
   // Popping should be faster than pushing
-  if (
-    previousTransitionProps.navigationState.index >=
-    transitionProps.navigationState.index
-  ) {
+  if (previousTransitionProps.navigationState.index >= transitionProps.navigationState.index) {
     speed = 40;
     restSpeedThreshold = 0.2;
     restDisplacementThreshold = 0.15;
@@ -62,7 +53,10 @@ const configureNoopTransition = (transitionProps, previousTransitionProps) => ({
  * Render the initial style when the initial layout isn't measured yet.
  */
 function forInitial(props: NavigationSceneRendererProps): Object {
-  const { navigationState, scene } = props;
+  const {
+    navigationState,
+    scene,
+  } = props;
 
   const focused = navigationState.index === scene.index;
   const opacity = focused ? 1 : 0;
@@ -70,12 +64,19 @@ function forInitial(props: NavigationSceneRendererProps): Object {
   const translate = focused ? 0 : 1000000;
   return {
     opacity,
-    transform: [{ translateX: translate }, { translateY: translate }],
+    transform: [
+      { translateX: translate },
+      { translateY: translate },
+    ],
   };
 }
 
 function customForHorizontal(props: NavigationSceneRendererProps): Object {
-  const { layout, position, scene } = props;
+  const {
+    layout,
+    position,
+    scene,
+  } = props;
 
   if (!layout.isMeasured) {
     return forInitial(props);
@@ -87,14 +88,14 @@ function customForHorizontal(props: NavigationSceneRendererProps): Object {
 
   let outputRange;
   if (I18nManager && I18nManager.isRTL) {
-    outputRange = [-width, 0, 100];
+    outputRange = [-width, 0, 0];
   } else {
-    outputRange = [width, 0, -100];
+    outputRange = [width, 0, -0];
   }
 
   const opacity = position.interpolate({
     inputRange,
-    outputRange: ([1, 1, 0.3]: Array<number>),
+    outputRange: ([1, 1, 1]: Array<number>),
   });
 
   const translateY = 0;
@@ -105,7 +106,10 @@ function customForHorizontal(props: NavigationSceneRendererProps): Object {
 
   return {
     opacity,
-    transform: [{ translateX }, { translateY }],
+    transform: [
+      { translateX },
+      { translateY },
+    ],
   };
 }
 
@@ -114,7 +118,12 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
   sceneAnimations: customForHorizontal,
   navigationBarAnimations: {
     forContainer: (props, delta) => {
-      const { layout, position, scene, scenes } = props;
+      const {
+        layout,
+        position,
+        scene,
+        scenes,
+      } = props;
 
       const index = scene.index;
 
@@ -125,10 +134,7 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
         offset = meVisible ? offset : -offset;
       } else {
         // if we're pushing, get the previous scenes' visibility. If we're popping, get the scene ahead
-        const prevVisible = barVisibleForSceneIndex(
-          scenes,
-          index + (delta > 0 ? -1 : 1)
-        );
+        const prevVisible = barVisibleForSceneIndex(scenes, index + (delta > 0 ? -1 : 1));
         if (!prevVisible && meVisible) {
           // when showing, if a push, move from right to left, otherwise if pop, move from left to right
           offset = delta > 0 ? offset : -offset;
@@ -156,9 +162,9 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
     /**
      * Crossfade the left view
      */
-    forLeft: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -169,9 +175,9 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
     /**
      * Crossfade the title
      */
-    forCenter: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -190,9 +196,9 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
     /**
      * Crossfade the right view
      */
-    forRight: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -204,12 +210,18 @@ export const SlideHorizontalIOS: ExNavigationStyles = {
   gestures: CardStackPanResponder.forHorizontal,
 };
 
+
 export const SlideHorizontalFixedNav: ExNavigationStyles = {
   configureTransition: configureSpringTransition,
   sceneAnimations: customForHorizontal,
   navigationBarAnimations: {
     forContainer: (props, delta) => {
-      const { layout, position, scene, scenes } = props;
+      const {
+        layout,
+        position,
+        scene,
+        scenes,
+      } = props;
 
       const index = scene.index;
 
@@ -220,10 +232,7 @@ export const SlideHorizontalFixedNav: ExNavigationStyles = {
         offset = meVisible ? offset : -offset;
       } else {
         // if we're pushing, get the previous scenes' visibility. If we're popping, get the scene ahead
-        const prevVisible = barVisibleForSceneIndex(
-          scenes,
-          index + (delta > 0 ? -1 : 1)
-        );
+        const prevVisible = barVisibleForSceneIndex(scenes, index + (delta > 0 ? -1 : 1));
         if (!prevVisible && meVisible) {
           // when showing, if a push, move from right to left, otherwise if pop, move from left to right
           offset = delta > 0 ? offset : -offset;
@@ -251,9 +260,9 @@ export const SlideHorizontalFixedNav: ExNavigationStyles = {
     /**
      * Crossfade the left view
      */
-    forLeft: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -264,9 +273,9 @@ export const SlideHorizontalFixedNav: ExNavigationStyles = {
     /**
      * Crossfade the title
      */
-    forCenter: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -277,9 +286,9 @@ export const SlideHorizontalFixedNav: ExNavigationStyles = {
     /**
      * Crossfade the right view
      */
-    forRight: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -291,12 +300,17 @@ export const SlideHorizontalFixedNav: ExNavigationStyles = {
   },
 };
 
-export const SlideHorizontal: ExNavigationStyles = {
-  configureTransition: configureSpringTransition,
+export const SlideHorizontalTransparent: ExNavigationStyles = {
+  configureTransition: configureNoopTransition,
   sceneAnimations: customForHorizontal,
   navigationBarAnimations: {
     forContainer: (props, delta) => {
-      const { layout, position, scene, scenes } = props;
+      const {
+        layout,
+        position,
+        scene,
+        scenes,
+      } = props;
 
       const index = scene.index;
 
@@ -307,10 +321,7 @@ export const SlideHorizontal: ExNavigationStyles = {
         offset = meVisible ? offset : -offset;
       } else {
         // if we're pushing, get the previous scenes' visibility. If we're popping, get the scene ahead
-        const prevVisible = barVisibleForSceneIndex(
-          scenes,
-          index + (delta > 0 ? -1 : 1)
-        );
+        const prevVisible = barVisibleForSceneIndex(scenes, index + (delta > 0 ? -1 : 1));
         if (!prevVisible && meVisible) {
           // when showing, if a push, move from right to left, otherwise if pop, move from left to right
           offset = delta > 0 ? offset : -offset;
@@ -321,26 +332,16 @@ export const SlideHorizontal: ExNavigationStyles = {
       }
 
       return {
-        transform: [
-          {
-            translateX: position.interpolate({
-              inputRange: [index - 1, index, index + 1],
-              outputRange: [
-                barVisibleForSceneIndex(scenes, index - 1) ? 0 : offset,
-                barVisibleForSceneIndex(scenes, index) ? 0 : offset,
-                barVisibleForSceneIndex(scenes, index + 1) ? 0 : offset,
-              ],
-            }),
-          },
-        ],
+        opacity: 1,
+        backgroundColor: 'white',
       };
     },
     /**
      * Crossfade the left view
      */
-    forLeft: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index - 0.3, index, index + 0.3, index + 1],
@@ -357,9 +358,99 @@ export const SlideHorizontal: ExNavigationStyles = {
     /**
      * Crossfade the title
      */
-    forCenter: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+
+      return {
+        opacity: 1,
+      };
+    },
+    /**
+     * Crossfade the right view
+     */
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+      return {
+        opacity: 1,
+      };
+    },
+  },
+  gestures: CardStackPanResponder.forHorizontal,
+};
+
+export const SlideHorizontal: ExNavigationStyles = {
+  configureTransition: configureSpringTransition,
+  sceneAnimations: customForHorizontal,
+  navigationBarAnimations: {
+    forContainer: (props, delta) => {
+      const {
+        layout,
+        position,
+        scene,
+        scenes,
+      } = props;
+
+      const index = scene.index;
+
+      const meVisible = barVisibleForSceneIndex(scenes, index);
+      let offset = layout.initWidth;
+      if (delta === 0) {
+        // default state
+        offset = meVisible ? offset : -offset;
+      } else {
+        // if we're pushing, get the previous scenes' visibility. If we're popping, get the scene ahead
+        const prevVisible = barVisibleForSceneIndex(scenes, index + (delta > 0 ? -1 : 1));
+        if (!prevVisible && meVisible) {
+          // when showing, if a push, move from right to left, otherwise if pop, move from left to right
+          offset = delta > 0 ? offset : -offset;
+        } else {
+          // when hiding, if a push, move from left to right, otherwise if a pop, move from right to left
+          offset = delta > 0 ? -offset : offset;
+        }
+      }
+
+      return {
+        transform: [
+          {
+            translateX: position.interpolate({
+              inputRange: [index - 1, index, index + 1],
+              outputRange: [
+                barVisibleForSceneIndex(scenes, index - 1) ? 0 : offset,
+                barVisibleForSceneIndex(scenes, index) ? 0 : offset,
+                barVisibleForSceneIndex(scenes, index + 1) ? 0 : offset,
+              ],
+            }),
+          },
+        ],
+      };
+    },
+    /**
+     * Crossfade the left view
+     */
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+      return {
+        opacity: position.interpolate({
+          inputRange: [index - 1, index - 0.3, index, index + 0.3, index + 1],
+          outputRange: [
+            0,
+            barVisibleForSceneIndex(scenes, index) ? 0.05 : 0,
+            barVisibleForSceneIndex(scenes, index) ? 1 : 0,
+            barVisibleForSceneIndex(scenes, index) ? 0.3 : 0,
+            0,
+          ],
+        }),
+      };
+    },
+    /**
+     * Crossfade the title
+     */
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
 
       return {
         opacity: position.interpolate({
@@ -377,9 +468,9 @@ export const SlideHorizontal: ExNavigationStyles = {
     /**
      * Crossfade the right view
      */
-    forRight: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index - 0.3, index, index + 0.3, index + 1],
@@ -405,7 +496,11 @@ export const SlideHorizontal: ExNavigationStyles = {
 export const FloatHorizontal = SlideHorizontal;
 
 function customForVertical(props: NavigationSceneRendererProps): Object {
-  const { layout, position, scene } = props;
+  const {
+    layout,
+    position,
+    scene,
+  } = props;
 
   if (!layout.isMeasured) {
     return forInitial(props);
@@ -422,7 +517,10 @@ function customForVertical(props: NavigationSceneRendererProps): Object {
   });
 
   return {
-    transform: [{ translateX }, { translateY }],
+    transform: [
+      { translateX },
+      { translateY },
+    ],
   };
 }
 
@@ -458,7 +556,9 @@ export const SlideVertical: ExNavigationStyles = {
           fadeOffset = delta > 0 ? 0 : 1;
         }
       }
-
+      if(Platform.OS === 'android') {
+        offset = -offset;
+      }
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -530,7 +630,12 @@ export const FloatVertical: ExNavigationStyles = {
   sceneAnimations: CardStackStyleInterpolator.forVertical,
   navigationBarAnimations: {
     forContainer: (props, delta) => {
-      const { layout, position, scene, scenes } = props;
+      const {
+        layout,
+        position,
+        scene,
+        scenes,
+      } = props;
 
       const index = scene.index;
 
@@ -543,10 +648,7 @@ export const FloatVertical: ExNavigationStyles = {
         offset = meVisible ? offset : 0;
         fadeOffset = meVisible ? 1 : 0;
       } else {
-        const prevVisible = barVisibleForSceneIndex(
-          scenes,
-          index + (delta > 0 ? -1 : 1)
-        );
+        const prevVisible = barVisibleForSceneIndex(scenes, index + (delta > 0 ? -1 : 1));
         if (!prevVisible && meVisible) {
           // if pushing, slide, no fade. If popping, no slide, fade
           offset = delta > 0 ? offset : 0;
@@ -584,9 +686,9 @@ export const FloatVertical: ExNavigationStyles = {
     /**
      * Crossfade the left view
      */
-    forLeft: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -597,9 +699,9 @@ export const FloatVertical: ExNavigationStyles = {
     /**
      * Crossfade the title
      */
-    forCenter: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -610,9 +712,9 @@ export const FloatVertical: ExNavigationStyles = {
     /**
      * Crossfade the right view
      */
-    forRight: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -626,8 +728,11 @@ export const FloatVertical: ExNavigationStyles = {
 
 export const Fade: ExNavigationStyles = {
   configureTransition: configureTimingTransition,
-  sceneAnimations: props => {
-    const { position, scene } = props;
+  sceneAnimations: (props) => {
+    const {
+      position,
+      scene,
+    } = props;
 
     const index = scene.index;
     const inputRange = [index - 1, index, index + 1];
@@ -639,12 +744,22 @@ export const Fade: ExNavigationStyles = {
 
     return {
       opacity,
-      transform: [{ translateX: 0 }, { translateY: 0 }, { scale: 1 }],
+      transform: [
+        { translateX: 0 },
+        { translateY: 0 },
+        { scale: 1 },
+      ],
+      backgroundColor: 'transparent',
+      shadowOpacity: 0,
     };
   },
   navigationBarAnimations: {
     forContainer: (props, delta) => {
-      const { position, scene, scenes } = props;
+      const {
+        position,
+        scene,
+        scenes,
+      } = props;
 
       const index = scene.index;
 
@@ -662,9 +777,9 @@ export const Fade: ExNavigationStyles = {
     /**
      * Crossfade the left view
      */
-    forLeft: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -675,9 +790,9 @@ export const Fade: ExNavigationStyles = {
     /**
      * Crossfade the title
      */
-    forCenter: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -688,9 +803,9 @@ export const Fade: ExNavigationStyles = {
     /**
      * Crossfade the right view
      */
-    forRight: props => {
-      const { position, scene, scenes } = props;
-      const { index } = scene;
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
       return {
         opacity: position.interpolate({
           inputRange: [index - 1, index, index + 1],
@@ -703,8 +818,80 @@ export const Fade: ExNavigationStyles = {
 };
 
 export const NoAnimation: ExNavigationStyles = {
-  ...Fade,
   configureTransition: configureNoopTransition,
+  sceneAnimations: (props) => {
+    const {
+      position,
+      scene,
+    } = props;
+
+    return {
+      opacity: 1,
+      backgroundColor: 'transparent',
+      shadowOpacity: 0,
+    };
+  },
+  navigationBarAnimations: {
+    forContainer: (props, delta) => {
+      const {
+        position,
+        scene,
+        scenes,
+      } = props;
+
+      const index = scene.index;
+
+      return {
+        opacity: position.interpolate({
+          inputRange: [index - 1, index, index + 1],
+          outputRange: [
+            barVisibleForSceneIndex(scenes, index - 1) ? 1 :1,
+            barVisibleForSceneIndex(scenes, index) ? 1 : 1,
+            barVisibleForSceneIndex(scenes, index + 1) ? 1 : 1,
+          ],
+        }),
+      };
+    },
+    /**
+     * Crossfade the left view
+     */
+    forLeft: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+      return {
+        opacity: position.interpolate({
+          inputRange: [index - 1, index, index + 1],
+          outputRange: [0, barVisibleForSceneIndex(scenes, index) ? 1 : 0, 0],
+        }),
+      };
+    },
+    /**
+     * Crossfade the title
+     */
+    forCenter: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+      return {
+        opacity: position.interpolate({
+          inputRange: [index - 1, index, index + 1],
+          outputRange: [0, barVisibleForSceneIndex(scenes, index) ? 1 : 0, 0],
+        }),
+      };
+    },
+    /**
+     * Crossfade the right view
+     */
+    forRight: (props) => {
+      const {position, scene, scenes} = props;
+      const {index} = scene;
+      return {
+        opacity: position.interpolate({
+          inputRange: [index - 1, index, index + 1],
+          outputRange: [0, barVisibleForSceneIndex(scenes, index) ? 1 : 0, 0],
+        }),
+      };
+    },
+  },
 };
 
 /**
