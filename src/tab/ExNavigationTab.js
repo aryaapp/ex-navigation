@@ -256,6 +256,12 @@ class ExNavigationTab extends PureComponent<any, Props, State> {
       const navigatorUIDForTabKey = this._getNavigatorContext().getNavigatorUIDForTabKey(
         currentTabKey
       );
+      if (typeof this.props.onWillChangeTab === 'function') {
+        let changeTab = this.props.onWillChangeTab(currentTabKey);
+        if (!changeTab) {
+          return;
+        }
+      }
       if (navigatorUIDForTabKey) {
         this.props.navigation.dispatch(
           Actions.setCurrentNavigator(navigatorUIDForTabKey)
@@ -338,12 +344,6 @@ class ExNavigationTab extends PureComponent<any, Props, State> {
   }
 
   _setActiveTab(id, index) {
-    if (typeof this.props.onWillChangeTab === 'function') {
-      let changeTab = this.props.onWillChangeTab(id);
-      if (!changeTab) {
-        return;
-      }
-    }
 
     this._getNavigatorContext().jumpToTab(id);
     if (typeof this.props.onTabPress === 'function') {
